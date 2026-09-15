@@ -1,0 +1,19 @@
+# Python / FastAPI backend
+__pycache__/
+*.py[cod]
+*.egg-info/
+.env
+backend/venv/
+backend/.venv/
+
+# Node / React frontend
+frontend/node_modules/
+frontend/build/
+frontend/.env
+npm-debug.log*
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+*.swp
