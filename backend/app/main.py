@@ -35,6 +35,20 @@ try:
 except Exception as e:
     print(f"⚠️ خطا در مهاجرت ستون price: {e}")
 
+# ====== مهاجرت: افزودن واحد اندازه‌گیری و اندازه‌ی بسته به محصولات ======
+try:
+    with engine.connect() as conn:
+        conn.execute(text(
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS unit_name VARCHAR(50) NOT NULL DEFAULT 'عدد'"
+        ))
+        conn.execute(text(
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS package_size DOUBLE PRECISION NOT NULL DEFAULT 1"
+        ))
+        conn.commit()
+    print("✅ ستون‌های unit_name و package_size بررسی/اضافه شدند")
+except Exception as e:
+    print(f"⚠️ خطا در مهاجرت ستون‌های unit_name/package_size: {e}")
+
 # ====== مهاجرت: افزودن کدملی (شناسه‌ی جدید درخواست) و محل خدمتِ متنی به جدول requests ======
 try:
     with engine.connect() as conn:

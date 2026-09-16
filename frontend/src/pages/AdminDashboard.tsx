@@ -7,9 +7,9 @@ const AdminDashboard: React.FC = () => {
   const [products, setProducts] = useState<any[]>([]);
   const [requests, setRequests] = useState<any[]>([]);
   const [deadline, setDeadline] = useState<string | null>(null);
-  const [newProduct, setNewProduct] = useState({ name: '', type: '', max_quantity: 1, price: 0, description: '' });
+  const [newProduct, setNewProduct] = useState({ name: '', type: '', max_quantity: 1, price: 0, unit_name: 'عدد', package_size: 1, description: '' });
   const [editingProduct, setEditingProduct] = useState<any>(null);
-  const [editFormData, setEditFormData] = useState({ name: '', type: '', max_quantity: 1, price: 0, description: '' });
+  const [editFormData, setEditFormData] = useState({ name: '', type: '', max_quantity: 1, price: 0, unit_name: 'عدد', package_size: 1, description: '' });
   const [showEditModal, setShowEditModal] = useState(false);
   const [serviceLocations, setServiceLocations] = useState<any[]>([]);
   const [newServiceLocation, setNewServiceLocation] = useState({ name: '' });
@@ -104,7 +104,7 @@ const AdminDashboard: React.FC = () => {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       await axios.post('/api/products', newProduct, { headers });
-      setNewProduct({ name: '', type: '', max_quantity: 1, price: 0, description: '' });
+      setNewProduct({ name: '', type: '', max_quantity: 1, price: 0, unit_name: 'عدد', package_size: 1, description: '' });
       setMessage('✅ محصول با موفقیت اضافه شد');
       fetchData();
     } catch (error: any) {
@@ -120,6 +120,8 @@ const AdminDashboard: React.FC = () => {
       type: product.type,
       max_quantity: product.max_quantity,
       price: product.price || 0,
+      unit_name: product.unit_name || 'عدد',
+      package_size: product.package_size || 1,
       description: product.description || ''
     });
     setShowEditModal(true);
@@ -524,7 +526,7 @@ const AdminDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6 mb-6">
           <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-4">مدیریت محصولات</h2>
           
-          <form onSubmit={handleAddProduct} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mb-4">
+          <form onSubmit={handleAddProduct} className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mb-4">
             <input
               type="text"
               placeholder="نام محصول"
@@ -543,7 +545,7 @@ const AdminDashboard: React.FC = () => {
             />
             <input
               type="number"
-              placeholder="حداکثر تعداد"
+              placeholder="حداکثر تعداد بسته"
               required
               min="1"
               className="px-3 py-2 border border-gray-300 rounded-md text-sm"
@@ -551,8 +553,26 @@ const AdminDashboard: React.FC = () => {
               onChange={(e) => setNewProduct({...newProduct, max_quantity: parseInt(e.target.value) || 1})}
             />
             <input
+              type="text"
+              placeholder="واحد (کیلوگرم، عدد، لیتر...)"
+              required
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              value={newProduct.unit_name}
+              onChange={(e) => setNewProduct({...newProduct, unit_name: e.target.value})}
+            />
+            <input
               type="number"
-              placeholder="قیمت (ریال)"
+              placeholder="مقدار هر بسته (مثلاً 2)"
+              required
+              min="0.01"
+              step="0.01"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              value={newProduct.package_size}
+              onChange={(e) => setNewProduct({...newProduct, package_size: parseFloat(e.target.value) || 1})}
+            />
+            <input
+              type="number"
+              placeholder="قیمت به ازای هر واحد (ریال)"
               required
               min="0"
               className="px-3 py-2 border border-gray-300 rounded-md text-sm"
@@ -570,6 +590,9 @@ const AdminDashboard: React.FC = () => {
               افزودن محصول
             </button>
           </form>
+          <p className="text-xs text-gray-500 mb-4">
+            مثال: برای «گوشت قرمز» با بسته‌بندی ۲ کیلوگرمی، واحد را «کیلوگرم»، مقدار هر بسته را ۲ و قیمت را قیمتِ هر کیلوگرم وارد کنید.
+          </p>
 
           <div className="overflow-x-auto -mx-4 sm:-mx-0">
             <div className="min-w-full inline-block align-middle">
@@ -579,8 +602,10 @@ const AdminDashboard: React.FC = () => {
                     <tr>
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نام</th>
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نوع</th>
-                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">حداکثر تعداد</th>
-                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">قیمت (ریال)</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">حداکثر تعداد بسته</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">بسته‌بندی</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">قیمت هر واحد (ریال)</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">قیمت هر بسته (ریال)</th>
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">توضیحات</th>
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">عملیات</th>
                     </tr>
@@ -598,7 +623,13 @@ const AdminDashboard: React.FC = () => {
                           {product.max_quantity}
                         </td>
                         <td className="px-3 py-2 text-sm whitespace-nowrap">
+                          {(product.package_size || 1)} {product.unit_name || 'عدد'} / بسته
+                        </td>
+                        <td className="px-3 py-2 text-sm whitespace-nowrap">
                           {(product.price || 0).toLocaleString('fa-IR')}
+                        </td>
+                        <td className="px-3 py-2 text-sm whitespace-nowrap">
+                          {Math.round((product.price || 0) * (product.package_size || 1)).toLocaleString('fa-IR')}
                         </td>
                         <td className="px-3 py-2 text-sm break-words max-w-[80px] sm:max-w-[120px] truncate">
                           {product.description || '-'}
@@ -1016,7 +1047,7 @@ const AdminDashboard: React.FC = () => {
                 />
               </div>
               <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">حداکثر تعداد</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">حداکثر تعداد بسته</label>
                 <input
                   type="number"
                   required
@@ -1026,8 +1057,32 @@ const AdminDashboard: React.FC = () => {
                   onChange={(e) => setEditFormData({...editFormData, max_quantity: parseInt(e.target.value) || 1})}
                 />
               </div>
+              <div className="mb-3 grid grid-cols-2 gap-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">واحد</label>
+                  <input
+                    type="text"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    value={editFormData.unit_name}
+                    onChange={(e) => setEditFormData({...editFormData, unit_name: e.target.value})}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">مقدار هر بسته</label>
+                  <input
+                    type="number"
+                    required
+                    min="0.01"
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+                    value={editFormData.package_size}
+                    onChange={(e) => setEditFormData({...editFormData, package_size: parseFloat(e.target.value) || 1})}
+                  />
+                </div>
+              </div>
               <div className="mb-3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">قیمت (ریال)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">قیمت به ازای هر واحد (ریال)</label>
                 <input
                   type="number"
                   required
@@ -1036,6 +1091,9 @@ const AdminDashboard: React.FC = () => {
                   value={editFormData.price}
                   onChange={(e) => setEditFormData({...editFormData, price: parseInt(e.target.value) || 0})}
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  قیمت این بسته: {Math.round((editFormData.price || 0) * (editFormData.package_size || 1)).toLocaleString('fa-IR')} ریال
+                </p>
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-1">توضیحات</label>

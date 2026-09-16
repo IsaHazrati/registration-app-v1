@@ -228,7 +228,7 @@ const PublicForm: React.FC = () => {
   };
 
   const totalPrice = products.reduce(
-    (sum, p) => sum + (p.price || 0) * (requestItems[p.id] || 0),
+    (sum, p) => sum + (p.price || 0) * (p.package_size || 1) * (requestItems[p.id] || 0),
     0
   );
 
@@ -376,61 +376,81 @@ const PublicForm: React.FC = () => {
 
                 <div className="mb-6">
                   <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3">محصولات</h2>
-                  {products.map((product) => (
-                    <div
-                      key={product.id}
-                      className="flex flex-col gap-1 p-3 border rounded-md mb-2"
-                    >
-                      <div className="flex flex-wrap items-center gap-1 sm:gap-2">
-                        <span className="font-medium text-sm sm:text-base break-words">
-                          {product.name}
-                        </span>
-                        <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">
-                          ({product.type})
-                        </span>
-                        <span className="text-xs sm:text-sm text-gray-400 whitespace-nowrap">
-                          حداکثر: {product.max_quantity}
-                        </span>
-                        {product.price > 0 && (
-                          <span className="text-xs sm:text-sm text-green-700 whitespace-nowrap">
-                            قیمت: {product.price.toLocaleString('fa-IR')} ریال
+                  {products.map((product) => {
+                    const unitName = product.unit_name || 'عدد';
+                    const packageSize = product.package_size || 1;
+                    const pricePerPackage = Math.round((product.price || 0) * packageSize);
+                    const qty = requestItems[product.id] || 0;
+                    const lineTotal = Math.round(pricePerPackage * qty);
+                    return (
+                      <div
+                        key={product.id}
+                        className="flex flex-col gap-1 p-3 border rounded-md mb-2"
+                      >
+                        <div className="flex flex-wrap items-center gap-1 sm:gap-2">
+                          <span className="font-medium text-sm sm:text-base break-words">
+                            {product.name}
                           </span>
+                          <span className="text-xs sm:text-sm text-gray-500 whitespace-nowrap">
+                            ({product.type})
+                          </span>
+                          <span className="text-xs sm:text-sm text-gray-400 whitespace-nowrap">
+                            حداکثر: {product.max_quantity} بسته
+                          </span>
+                        </div>
+
+                        {product.price > 0 && (
+                          <div className="text-xs sm:text-sm text-gray-600 bg-gray-50 rounded-md px-2 py-1.5 leading-6">
+                            هر بسته = <span className="font-medium">{packageSize.toLocaleString('fa-IR')} {unitName}</span>
+                            {' | '}قیمت هر {unitName}: <span className="font-medium">{product.price.toLocaleString('fa-IR')} ریال</span>
+                            {' | '}
+                            <span className="text-green-700 font-medium">
+                              قیمت هر بسته: {pricePerPackage.toLocaleString('fa-IR')} ریال
+                            </span>
+                          </div>
                         )}
-                      </div>
 
-                      {product.description && (
-                        <p className="text-xs text-gray-500 break-words line-clamp-3">
-                          {product.description}
-                        </p>
-                      )}
+                        {product.description && (
+                          <p className="text-xs text-gray-500 break-words line-clamp-3">
+                            {product.description}
+                          </p>
+                        )}
 
-                      <div className="flex items-center justify-end mt-1">
-                        <label className="text-sm text-gray-600 ml-2">تعداد:</label>
-                        <input
-                          type="text"
-                          inputMode="numeric"
-                          pattern="[0-9]*"
-                          className="w-20 px-2 py-1 border border-gray-300 rounded-md text-sm"
-                          value={requestItems[product.id] || 0}
-                          onFocus={(e) => e.target.select()}
-                          onChange={(e) => {
-                            const digitsOnly = e.target.value.replace(/[^0-9]/g, '');
-                            const val = parseInt(digitsOnly) || 0;
-                            setRequestItems({
-                              ...requestItems,
-                              [product.id]: Math.min(val, product.max_quantity),
-                            });
-                          }}
-                        />
+                        <div className="flex items-center justify-between mt-1">
+                          {qty > 0 && product.price > 0 ? (
+                            <span className="text-xs sm:text-sm text-blue-700 font-medium">
+                              جمع این محصول: {lineTotal.toLocaleString('fa-IR')} ریال
+                            </span>
+                          ) : <span />}
+                          <div className="flex items-center">
+                            <label className="text-sm text-gray-600 ml-2">تعداد بسته:</label>
+                            <input
+                              type="text"
+                              inputMode="numeric"
+                              pattern="[0-9]*"
+                              className="w-20 px-2 py-1 border border-gray-300 rounded-md text-sm"
+                              value={qty}
+                              onFocus={(e) => e.target.select()}
+                              onChange={(e) => {
+                                const digitsOnly = e.target.value.replace(/[^0-9]/g, '');
+                                const val = parseInt(digitsOnly) || 0;
+                                setRequestItems({
+                                  ...requestItems,
+                                  [product.id]: Math.min(val, product.max_quantity),
+                                });
+                              }}
+                            />
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
 
                 <div className="flex justify-between items-center bg-gray-50 border border-gray-200 rounded-md p-3 mb-6">
                   <span className="text-sm sm:text-base font-semibold text-gray-700">مجموع کالاها</span>
                   <span className="text-sm sm:text-base font-bold text-blue-700">
-                    {totalPrice.toLocaleString('fa-IR')} ریال
+                    {Math.round(totalPrice).toLocaleString('fa-IR')} ریال
                   </span>
                 </div>
 

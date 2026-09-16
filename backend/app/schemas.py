@@ -7,7 +7,9 @@ class ProductBase(BaseModel):
     name: str
     type: str
     max_quantity: int = Field(gt=0)
-    price: int = Field(ge=0)  # ← فیلد جدید: قیمت به ریال
+    price: int = Field(ge=0)  # ← فیلد جدید: قیمت به ریال (به ازای هر واحد، نه هر بسته)
+    unit_name: str = Field(default="عدد", min_length=1, max_length=50)  # ← فیلد جدید: نام واحد (کیلوگرم، عدد، لیتر و ...)
+    package_size: float = Field(default=1, gt=0)  # ← فیلد جدید: مقدار هر بسته به همان واحد
     description: Optional[str] = None
 
 class ProductCreate(ProductBase):
@@ -19,7 +21,9 @@ class Product(BaseModel):
     name: str
     type: str
     max_quantity: int
-    price: int = 0  # ← فیلد جدید: قیمت به ریال
+    price: int = 0  # ← فیلد جدید: قیمت به ریال (به ازای هر واحد، نه هر بسته)
+    unit_name: str = "عدد"  # ← فیلد جدید: نام واحد
+    package_size: float = 1  # ← فیلد جدید: مقدار هر بسته به همان واحد
     description: Optional[str] = None
     created_at: datetime
     class Config:

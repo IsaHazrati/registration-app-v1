@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, CheckConstraint, Text
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, CheckConstraint, Text, Float
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from .database import Base
@@ -9,7 +9,9 @@ class Product(Base):
     name = Column(String(255), nullable=False)
     type = Column(String(255), nullable=False)
     max_quantity = Column(Integer, nullable=False)
-    price = Column(Integer, nullable=False, default=0)  # ← فیلد جدید: قیمت به ریال
+    price = Column(Integer, nullable=False, default=0)  # ← فیلد جدید: قیمت به ریال (به ازای هر واحد، نه هر بسته)
+    unit_name = Column(String(50), nullable=False, default="عدد")  # ← فیلد جدید: نام واحد اندازه‌گیری (مثلاً کیلوگرم، عدد، لیتر)
+    package_size = Column(Float, nullable=False, default=1)  # ← فیلد جدید: مقدار هر بسته به همان واحد (مثلاً ۲ برای بسته‌ی ۲ کیلوگرمی)
     description = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

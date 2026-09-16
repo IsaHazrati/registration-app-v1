@@ -78,7 +78,7 @@ def export_requests_csv(db: Session = Depends(get_db), admin: str = Depends(veri
     
     for req in requests:
         items_dict = {item.product_id: item.quantity for item in req.items}
-        total_price = sum((item.quantity or 0) * (item.product.price or 0) for item in req.items if item.product)
+        total_price = int(round(sum((item.quantity or 0) * (item.product.package_size or 1) * (item.product.price or 0) for item in req.items if item.product)))
         row = [
             req.national_code or "",
             req.employee_code,
@@ -116,7 +116,7 @@ def export_requests_excel(db: Session = Depends(get_db), admin: str = Depends(ve
     
     for req in requests:
         items_dict = {item.product_id: item.quantity for item in req.items}
-        total_price = sum((item.quantity or 0) * (item.product.price or 0) for item in req.items if item.product)
+        total_price = int(round(sum((item.quantity or 0) * (item.product.package_size or 1) * (item.product.price or 0) for item in req.items if item.product)))
         row = [
             req.national_code or "",
             req.employee_code,
