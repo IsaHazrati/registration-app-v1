@@ -241,6 +241,8 @@ const PublicForm: React.FC = () => {
     0
   );
 
+  const hasSelectedProduct = products.length > 0 && products.some(p => (requestItems[p.id] || 0) > 0);
+
   return (
     <div className="min-h-screen bg-gray-100 py-6 sm:py-8 px-4">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-lg p-4 sm:p-6">
@@ -477,8 +479,8 @@ const PublicForm: React.FC = () => {
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     type="submit"
-                    disabled={loading}
-                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition disabled:opacity-50 text-sm sm:text-base"
+                    disabled={loading || !hasSelectedProduct}
+                    className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
                   >
                     {loading ? 'در حال ارسال...' : isEditing ? 'ویرایش درخواست' : 'ثبت درخواست'}
                   </button>
@@ -493,6 +495,13 @@ const PublicForm: React.FC = () => {
                     </button>
                   )}
                 </div>
+                {!hasSelectedProduct && (
+                  <p className="text-xs text-amber-600 mt-2 text-center sm:text-right">
+                    {products.length === 0
+                      ? 'در حال حاضر محصولی برای ثبت درخواست وجود ندارد.'
+                      : 'برای فعال شدن دکمه‌ی ثبت، حداقل یک محصول را انتخاب کنید.'}
+                  </p>
+                )}
               </form>
             )}
           </>
