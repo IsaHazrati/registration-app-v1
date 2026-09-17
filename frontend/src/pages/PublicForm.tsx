@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 const PublicForm: React.FC = () => {
@@ -40,6 +40,8 @@ const PublicForm: React.FC = () => {
   const [verifiedPhone, setVerifiedPhone] = useState('');
 
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneError, setPhoneError] = useState('');
+  const phoneInputRef = useRef<HTMLInputElement>(null);
   const [products, setProducts] = useState<any[]>([]);
   const [requestItems, setRequestItems] = useState<{ [key: number]: number }>({});
   const [deadline, setDeadline] = useState<string | null>(null);
@@ -76,6 +78,7 @@ const PublicForm: React.FC = () => {
     setIsEditing(false);
     setVerifiedPhone('');
     setPhoneNumber('');
+    setPhoneError('');
     setRequestItems({});
     setAdminDescription('');
     setMessage('');
@@ -101,6 +104,7 @@ const PublicForm: React.FC = () => {
       } else {
         setIsEditing(false);
         setPhoneNumber('');
+        setPhoneError('');
         setRequestItems({});
         setAdminDescription('');
         setStep('form');
@@ -134,6 +138,7 @@ const PublicForm: React.FC = () => {
       setIsEditing(true);
       setVerifiedPhone(verifyPhone);
       setPhoneNumber(existing.phone_number || verifyPhone);
+      setPhoneError('');
       setAdminDescription(existing.admin_description || '');
 
       const items: { [key: number]: number } = {};
@@ -152,10 +157,15 @@ const PublicForm: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMessage('');
+    setPhoneError('');
 
     if (!/^09\d{9}$/.test(phoneNumber)) {
-      setMessage('❌ شماره تماس باید به فرمت صحیح موبایل ایران (مثال: 09123456789) باشد.');
-      setMessageType('error');
+      const errText = phoneNumber.trim() === ''
+        ? 'لطفاً شماره تماس را وارد کنید.'
+        : 'شماره تماس باید به فرمت صحیح موبایل ایران باشد (مثال: 09123456789).';
+      setPhoneError(errText);
+      phoneInputRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      phoneInputRef.current?.focus();
       return;
     }
 
@@ -363,12 +373,23 @@ const PublicForm: React.FC = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     شماره تماس (موبایل) *
                   </label>
+                  {phoneError && (
+                    <p className="text-red-600 text-sm mb-1">{phoneError}</p>
+                  )}
                   <input
+                    ref={phoneInputRef}
                     type="tel"
                     required
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 text-sm ${
+                      phoneError
+                        ? 'border-red-400 focus:ring-red-400'
+                        : 'border-gray-300 focus:ring-blue-500'
+                    }`}
                     value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value.replace(/[^0-9]/g, '').slice(0, 11))}
+                    onChange={(e) => {
+                      setPhoneNumber(e.target.value.replace(/[^0-9]/g, '').slice(0, 11));
+                      if (phoneError) setPhoneError('');
+                    }}
                     placeholder="مثال: 09123456789"
                   />
                 </div>
