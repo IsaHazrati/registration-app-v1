@@ -49,6 +49,7 @@ const PublicForm: React.FC = () => {
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error' | 'info'>('info');
   const [submitted, setSubmitted] = useState(false);
+  const [showEditSuccessModal, setShowEditSuccessModal] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -178,9 +179,7 @@ const PublicForm: React.FC = () => {
           phone_number: phoneNumber,
           items
         });
-        setMessage('✅ درخواست شما با موفقیت ویرایش شد!');
-        setMessageType('success');
-        setVerifiedPhone(phoneNumber);
+        setShowEditSuccessModal(true);
       } else {
         await axios.post('/api/requests', {
           national_code: nationalCode,
@@ -189,8 +188,8 @@ const PublicForm: React.FC = () => {
         });
         setMessage('✅ درخواست شما با موفقیت ثبت شد!');
         setMessageType('success');
+        setSubmitted(true);
       }
-      setSubmitted(true);
     } catch (error: any) {
       if (error.response?.status === 404) {
         setNotFoundModal(true);
@@ -502,6 +501,24 @@ const PublicForm: React.FC = () => {
               className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 text-sm sm:text-base"
             >
               متوجه شدم
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* مودال موفقیت: ویرایش درخواست انجام شد */}
+      {showEditSuccessModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full text-center">
+            <h3 className="text-xl font-semibold mb-3 text-green-600">✅ ویرایش موفق</h3>
+            <p className="mb-5 text-sm text-gray-700">
+              ویرایش محصولات با موفقیت انجام شد.
+            </p>
+            <button
+              onClick={() => { setShowEditSuccessModal(false); handleReset(); }}
+              className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 text-sm sm:text-base"
+            >
+              باشه
             </button>
           </div>
         </div>

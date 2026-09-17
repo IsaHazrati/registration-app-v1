@@ -24,6 +24,7 @@ class Product(BaseModel):
     price: int = 0  # ← فیلد جدید: قیمت به ریال (به ازای هر واحد، نه هر بسته)
     unit_name: str = "عدد"  # ← فیلد جدید: نام واحد
     package_size: float = 1  # ← فیلد جدید: مقدار هر بسته به همان واحد
+    is_active: bool = True  # ← فیلد جدید: فعال/غیرفعال
     description: Optional[str] = None
     created_at: datetime
     class Config:

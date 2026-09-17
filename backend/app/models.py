@@ -12,6 +12,7 @@ class Product(Base):
     price = Column(Integer, nullable=False, default=0)  # ← فیلد جدید: قیمت به ریال (به ازای هر واحد، نه هر بسته)
     unit_name = Column(String(50), nullable=False, default="عدد")  # ← فیلد جدید: نام واحد اندازه‌گیری (مثلاً کیلوگرم، عدد، لیتر)
     package_size = Column(Float, nullable=False, default=1)  # ← فیلد جدید: مقدار هر بسته به همان واحد (مثلاً ۲ برای بسته‌ی ۲ کیلوگرمی)
+    is_active = Column(Boolean, nullable=False, default=True)  # ← فیلد جدید: فعال/غیرفعال (غیرفعال یعنی در فرم عمومی نمایش داده نشود)
     description = Column(Text, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 

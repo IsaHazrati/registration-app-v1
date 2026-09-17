@@ -8,7 +8,12 @@ def get_product(db: Session, product_id: int):
     return db.query(models.Product).filter(models.Product.id == product_id).first()
 
 def get_products(db: Session, skip: int = 0, limit: int = 100):
+    """همه‌ی محصولات (فعال و غیرفعال) — برای پنل مدیریت"""
     return db.query(models.Product).offset(skip).limit(limit).all()
+
+def get_active_products(db: Session, skip: int = 0, limit: int = 100):
+    """فقط محصولات فعال — برای نمایش در فرم عمومی"""
+    return db.query(models.Product).filter(models.Product.is_active == True).offset(skip).limit(limit).all()
 
 def create_product(db: Session, product: schemas.ProductCreate):
     db_product = models.Product(**product.dict())
@@ -22,6 +27,14 @@ def update_product(db: Session, product_id: int, product: schemas.ProductCreate)
     if db_product:
         for key, value in product.dict().items():
             setattr(db_product, key, value)
+        db.commit()
+        db.refresh(db_product)
+    return db_product
+
+def toggle_product_active(db: Session, product_id: int):
+    db_product = get_product(db, product_id)
+    if db_product:
+        db_product.is_active = not db_product.is_active
         db.commit()
         db.refresh(db_product)
     return db_product

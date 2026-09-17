@@ -22,9 +22,19 @@ def test_products_router():
 # ========== روت‌های عمومی ==========
 @router.get("/public", response_model=List[schemas.Product])
 def get_public_products(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    return crud.get_products(db, skip=skip, limit=limit)
+    return crud.get_active_products(db, skip=skip, limit=limit)
 
 # ========== روت‌های مدیریت ==========
+@router.get("", response_model=List[schemas.Product])
+def get_all_products_admin(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db),
+    admin: str = Depends(verify_admin)
+):
+    """همه‌ی محصولات (فعال و غیرفعال) برای نمایش در پنل مدیریت"""
+    return crud.get_products(db, skip=skip, limit=limit)
+
 @router.post("", response_model=schemas.Product)
 def create_product(
     product: schemas.ProductCreate,
@@ -41,6 +51,17 @@ def update_product(
     admin: str = Depends(verify_admin)
 ):
     db_product = crud.update_product(db, product_id, product)
+    if not db_product:
+        raise HTTPException(status_code=404, detail="محصول یافت نشد")
+    return db_product
+
+@router.patch("/{product_id}/toggle-active", response_model=schemas.Product)
+def toggle_product_active(
+    product_id: int,
+    db: Session = Depends(get_db),
+    admin: str = Depends(verify_admin)
+):
+    db_product = crud.toggle_product_active(db, product_id)
     if not db_product:
         raise HTTPException(status_code=404, detail="محصول یافت نشد")
     return db_product

@@ -44,6 +44,9 @@ try:
         conn.execute(text(
             "ALTER TABLE products ADD COLUMN IF NOT EXISTS package_size DOUBLE PRECISION NOT NULL DEFAULT 1"
         ))
+        conn.execute(text(
+            "ALTER TABLE products ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT TRUE"
+        ))
         conn.commit()
     print("✅ ستون‌های unit_name و package_size بررسی/اضافه شدند")
 except Exception as e:

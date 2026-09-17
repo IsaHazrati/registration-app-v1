@@ -48,7 +48,7 @@ const AdminDashboard: React.FC = () => {
       const headers = { Authorization: `Bearer ${token}` };
       
       const [productsRes, requestsRes, deadlineRes, serviceLocationsRes, peopleRes] = await Promise.allSettled([
-        axios.get('/api/products/public'),
+        axios.get('/api/products', { headers }),
         axios.get('/api/admin/requests', { headers }),
         axios.get('/api/settings/deadline'),
         axios.get('/api/service-locations/public'),
@@ -150,6 +150,22 @@ const AdminDashboard: React.FC = () => {
       fetchData();
     } catch (error: any) {
       setMessage('❌ خطا در حذف محصول');
+      console.error(error);
+    }
+  };
+
+  const handleToggleProductActive = async (product: any) => {
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+      await axios.patch(`/api/products/${product.id}/toggle-active`, {}, { headers });
+      setMessage(
+        product.is_active
+          ? `✅ محصول «${product.name}» غیرفعال شد و دیگر در فرم عمومی نمایش داده نمی‌شود`
+          : `✅ محصول «${product.name}» فعال شد و دوباره در فرم عمومی نمایش داده می‌شود`
+      );
+      fetchData();
+    } catch (error: any) {
+      setMessage('❌ خطا در تغییر وضعیت محصول');
       console.error(error);
     }
   };
@@ -601,6 +617,7 @@ const AdminDashboard: React.FC = () => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نام</th>
+                      <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">وضعیت</th>
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">نوع</th>
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">حداکثر تعداد بسته</th>
                       <th className="px-3 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">بسته‌بندی</th>
@@ -612,9 +629,16 @@ const AdminDashboard: React.FC = () => {
                   </thead>
                   <tbody className="bg-white divide-y divide-gray-200">
                     {products.map((product) => (
-                      <tr key={product.id}>
+                      <tr key={product.id} className={product.is_active === false ? 'opacity-50' : ''}>
                         <td className="px-3 py-2 text-sm break-words max-w-[100px] sm:max-w-[150px]">
                           {product.name}
+                        </td>
+                        <td className="px-3 py-2 whitespace-nowrap">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            product.is_active === false ? 'bg-gray-200 text-gray-600' : 'bg-green-100 text-green-700'
+                          }`}>
+                            {product.is_active === false ? 'غیرفعال' : 'فعال'}
+                          </span>
                         </td>
                         <td className="px-3 py-2 text-sm whitespace-nowrap">
                           {product.type}
@@ -635,6 +659,14 @@ const AdminDashboard: React.FC = () => {
                           {product.description || '-'}
                         </td>
                         <td className="px-3 py-2 whitespace-nowrap">
+                          <button
+                            onClick={() => handleToggleProductActive(product)}
+                            className={`px-2 py-1 rounded-md text-xs sm:text-sm ml-1 text-white ${
+                              product.is_active === false ? 'bg-green-600 hover:bg-green-700' : 'bg-yellow-500 hover:bg-yellow-600'
+                            }`}
+                          >
+                            {product.is_active === false ? 'فعال‌سازی' : 'غیرفعال‌سازی'}
+                          </button>
                           <button
                             onClick={() => handleEditProduct(product)}
                             className="bg-blue-500 text-white px-2 py-1 rounded-md hover:bg-blue-600 text-xs sm:text-sm ml-1"
