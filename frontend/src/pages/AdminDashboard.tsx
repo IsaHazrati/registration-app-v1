@@ -368,6 +368,25 @@ const AdminDashboard: React.FC = () => {
     }
   };
 
+  const handleClearAllRequests = async () => {
+    const step1 = window.confirm(
+      'با این کار، همه‌ی «درخواست‌های ثبت‌شده» برای همیشه پاک می‌شوند (لیست افراد مجاز، محصولات و تنظیمات دست‌نخورده باقی می‌مانند).\n\nآیا مطمئن هستید؟'
+    );
+    if (!step1) return;
+    const step2 = window.confirm('این عملیات غیرقابل بازگشت است. برای تأیید نهایی دوباره تأیید کنید.');
+    if (!step2) return;
+
+    try {
+      const headers = { Authorization: `Bearer ${token}` };
+      const res = await axios.delete('/api/admin/requests/clear-all', { headers });
+      setMessage(`✅ ${res.data.deleted_requests} درخواست با موفقیت حذف شد`);
+      fetchData();
+    } catch (error: any) {
+      setMessage('❌ خطا در حذف درخواست‌ها');
+      console.error(error);
+    }
+  };
+
   const filteredPersons = authorizedPersons.filter((p) => {
     if (!peopleSearch.trim()) return true;
     const q = peopleSearch.trim().toLowerCase();
@@ -962,6 +981,12 @@ const AdminDashboard: React.FC = () => {
                 className="bg-green-500 text-white px-3 py-2 rounded-md hover:bg-green-600 text-sm"
               >
                 📊 Excel
+              </button>
+              <button
+                onClick={handleClearAllRequests}
+                className="bg-red-50 text-red-700 border border-red-200 px-3 py-2 rounded-md hover:bg-red-100 text-sm whitespace-nowrap"
+              >
+                🗑️ حذف همه‌ی درخواست‌ها
               </button>
             </div>
           </div>

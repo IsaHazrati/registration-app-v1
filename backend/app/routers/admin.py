@@ -143,6 +143,15 @@ def export_requests_excel(db: Session = Depends(get_db), admin: str = Depends(ve
     )
     return response
 
+@router.delete("/requests/clear-all")
+def clear_all_requests(db: Session = Depends(get_db), admin: str = Depends(verify_admin)):
+    """
+    پاک‌سازی کامل همه‌ی درخواست‌های ثبت‌شده (بدون دست زدن به لیست افراد مجاز،
+    محصولات، محل‌های خدمت یا تنظیمات).
+    """
+    count = crud.clear_all_requests(db)
+    return {"message": "همه‌ی درخواست‌ها با موفقیت حذف شدند", "deleted_requests": count}
+
 @router.delete("/requests/{request_id}")
 def delete_request(request_id: int, db: Session = Depends(get_db), admin: str = Depends(verify_admin)):
     db_request = crud.delete_request(db, request_id)
